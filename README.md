@@ -1,2 +1,6 @@
 # ksmo_lampro
-Supplementary scripts for analyses on the L. triangulum complex as described in Chambers et al. (2022).
+This repository contains scripts for analyses and data visualization from Chambers et al. (2022) on resolving a species boundary in the Lampropeltis triangulum complex.
+
+ANALYSES
+
+DATA VISUALIZATION
