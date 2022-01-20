@@ -1,8 +1,12 @@
 # ksmo_lampro
 This repository contains scripts for analyses and data visualization from Chambers et al. (2022) on resolving a species boundary in the Lampropeltis triangulum complex.
 
-ANALYSES
+## ANALYSES
 
+### Fixed difference analysis
+* [Analysis script](LINK_HERE)
+* [Data visualization script](LINK_HERE)
+* 
 DATA VISUALIZATION
 
 ## Monday, November 8 (4-5:30PM in WEL3.314)
