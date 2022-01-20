@@ -5,8 +5,11 @@ This repository contains scripts for analyses and data visualization from Chambe
 
 ## ANALYSES
 
+### Admixture index analysis
+
 ### Fixed difference analysis
 * [Analysis script](LINK_HERE)
 * [Data visualization script](LINK_HERE)
     1. Does this
     2. Does this
+
