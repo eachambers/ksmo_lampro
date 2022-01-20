@@ -3,6 +3,13 @@ This repository contains scripts for analyses and data visualization from Chambe
 
 *Please note: for scripts requiring sampling coordinates, latitude values are not provided because of concerns related to the commercial exploitation of these animals; I can provide latitude values to qualified investigators upon request for the purposes of re-analysis and reproducibility.*
 
+**Subset coding:**
+
+Most analyses were performed on subsets of the data (in all cases, samples with >50% missing data were removed). These are as follows:
+* **Full dataset:** 93 samples (KS-MO transect samples (n=85), *L. alterna* (n=5), *L. elapsoides* (n=3))
+* **KS-MO + alterna dataset:** (KS-MO transect samples (n=85), *L. alterna* (n=5))
+* **KS-MO transect dataset:** (KS-MO transect samples (n=85))
+
 ## Population Genetics Analyses
 
 ### PCA and correlation test
