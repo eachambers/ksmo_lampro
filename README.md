@@ -25,16 +25,12 @@ Most analyses were performed on subsets of the data (in all cases, samples with 
 
 ### PCA and correlation test
 * [Analysis & visualization script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_visualization_scripts/FigS4_PCA.R)
-    1. Runs a PCA on four subsets of the data: all samples, KS-MO + alterna, KS-MO transect only
+    1. Runs a PCA on three subsets of the data: all samples, KS-MO + alterna, KS-MO transect only
     2. Visualizes PCA for PC1, PC2, and PC3 for each subset **Fig. S4**
 
 ### sNMF analysis
 * [Analysis script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_analysis_scripts/sNMF_analyses.R)
     1. Runs sNMF on all three data subsets
-    2. Runs sNMF on XXX
-* [Data visualization script](LINK_HERE)
-    1. XXX
-    2. Generates **Fig. SX**
 
 ### conStruct analysis
 * [Analysis script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_analysis_scripts/conStruct_analysis.R)
