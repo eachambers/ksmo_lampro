@@ -35,7 +35,6 @@ Most analyses were performed on subsets of the data (in all cases, samples with 
 ### conStruct analysis
 * [Analysis script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_analysis_scripts/conStruct_analysis.R)
     1. Runs conStruct on KS-MO transect samples
-* [Data visualization script (**Fig SX**)](LINK_HERE)
 
 ### Structure-based data visualization scripts
 * [Piecharts, repelled (**Figs. 2a, S7**)](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_visualization_scripts/Fig2A_S7_piecharts_repelled.R)
