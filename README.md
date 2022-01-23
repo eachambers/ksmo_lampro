@@ -44,6 +44,8 @@ Most analyses were performed on subsets of the data (in all cases, samples with 
 
 ### Admixture index analysis
 * [Analysis script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_analysis_scripts/Admixture_index_analysis.R)
+    1. Calculates diagnostic differences (given a user-specified threshold) between reference groups (east and west at KS-MO transect)
+    2. Based on diagnostic diffs between reference groups, calculates admixture index values for remaining groups across transect
 * [Data visualization script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_visualization_scripts/Fig3_admixture_index.R)
     1. Build histograms of admixture index values per group (**Fig. 3b**)
     2. Plots per-locus admixture index values (**Fig. 3c**)
