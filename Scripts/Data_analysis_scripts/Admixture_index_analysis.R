@@ -24,7 +24,6 @@ library(tidyverse)
 
 sampling <- read_tsv("../5_Fixed_difference_analysis/FDA_input_files/FDA_data.txt", col_names = TRUE)
 
-# seq <- read_csv("r_seq_data.csv", col_names = TRUE) # 3253+3=3256
 seq <- read_tsv("admix_index_input_files/seq_data.txt", col_names = TRUE, col_types = cols(.default = "c"))
 
 
