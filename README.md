@@ -7,8 +7,8 @@ This repository contains scripts for analyses and data visualization from Chambe
 
 Most analyses were performed on subsets of the data (in all cases, samples with >50% missing data were removed). These are as follows:
 * **Full dataset:** 93 samples (KS-MO transect samples (n=85), *L. alterna* (n=5), *L. elapsoides* (n=3))
-* **KS-MO + alterna dataset:** (KS-MO transect samples (n=85), *L. alterna* (n=5))
-* **KS-MO transect dataset:** (KS-MO transect samples (n=85))
+* **KS-MO + alterna dataset:** 90 samples (KS-MO transect samples (n=85), *L. alterna* (n=5))
+* **KS-MO transect dataset:** 85 samples (KS-MO transect samples)
 
 ## Data processing
 * [Missing data calculations script](https://github.com/eachambers/ksmo_lampro/blob/main/Scripts/Data_analysis_scripts/Missing_data_calcs.R)
