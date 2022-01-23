@@ -1,1 +1,2 @@
-Scripts to run various analyses.
+## Scripts for data analysis.
+
