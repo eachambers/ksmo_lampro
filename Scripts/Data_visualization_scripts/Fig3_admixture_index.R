@@ -11,7 +11,7 @@ theme_set(theme_cowplot())
 ##    FILES REQUIRED:
 ##    freq_data from Admixture_index_analysis.R script
 ##    seq from Admixture_index_analysis.R script
-##    sampling object from Admixture_index_analysis.R script
+##    ../data_files_input_into_scripts/admixture_data.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Plot per locus admixture index values (Fig. 3C)
@@ -21,6 +21,8 @@ theme_set(theme_cowplot())
 
 
 # (1) Plot per locus admixture index values (Fig. 3C) ---------------------------------------------
+
+dat <- read_tsv("../data_files_input_into_scripts/admixture_data.txt", col_names = TRUE)
 
 freq_data %>% 
   left_join(sampling %>% 
@@ -51,11 +53,11 @@ seq %>%
   summarize(frac_gent_ind = sum(value==pure_gent)/n(),
             frac_sys_ind = sum(value==pure_sys)/n()) %>% 
   filter(population != 'alterna', population !='elapsoides') %>% 
-  left_join(sampling %>% 
+  left_join(dat %>% 
               group_by(SW_onedeglong) %>% 
               summarize(avg_long = mean(long)) %>% 
               rename(population = SW_onedeglong), by = 'population') %>% 
-  left_join(sampling %>% 
+  left_join(dat %>% 
               select(sample_ID, long), by = "sample_ID") -> freq_data_inds
 
 # write_csv(freq_data_inds, "freq_data_inds.csv")
@@ -97,7 +99,7 @@ ggsave("Fig3B_freq_inds.pdf", width=11, height=5)
 
 p_avg_smoothed <- 
 freq_data %>% 
-  left_join(sampling %>% 
+  left_join(dat %>% 
               group_by(SW_onedeglong) %>% 
               summarize(long = mean(long)) %>% 
               rename(population = SW_onedeglong), by = 'population') %>% 
