@@ -11,6 +11,7 @@ theme_set(theme_cowplot())
 ##    FILES REQUIRED:
 ##    freq_data from Admixture_index_analysis.R script
 ##    seq from Admixture_index_analysis.R script
+##    sampling object from Admixture_index_analysis.R script
 
 ##    STRUCTURE OF CODE:
 ##              (1) Plot per locus admixture index values (Fig. 3C)
