@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/3_Analyses/4_HZAR")
-
 library(quantreg)
 library(MCMCpack)
 library(hzar)
@@ -25,11 +23,11 @@ library(tidyverse)
 
 # (1) Import data ---------------------------------------------------------
 
-dist_data <- read_tsv("../../4_Data_visualization/data_files_input_into_scripts/admixture_data.txt", col_names = TRUE) %>% 
+# Below requires both lat/long data; contact the author if needed
+dist_data <- read_tsv("admixture_data.txt", col_names = TRUE) %>% 
   arrange(ordered_no_long)
 
 seq <- read_tsv("../3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE)
-
 
 
 

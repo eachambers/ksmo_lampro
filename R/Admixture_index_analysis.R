@@ -35,15 +35,15 @@ threshold <- 0.8 # change to 1 to see fixed diffs (100% inds different); should 
 
 seq %>%
   filter(population=="pure_gent" |
-           population=="pure_sys") %>%                            # 28 rows, 3,247 vars.
+           population=="pure_sys") %>%                          # 28 rows, 3,247 vars.
   gather(locus, value, -population, -sample_ID, -read_data) %>% # 91,084 rows
   filter(value != 'N') %>%                                      # 84,486 rows
-  count(population, locus, value) %>%                           # 8,287 rows
-  group_by(population,locus) %>%
+  dplyr::count(population, locus, value) %>%                    # 8,287 rows
+  group_by(population, locus) %>%
   mutate(frac=n/sum(n)) %>%
   ungroup() %>%
   filter(frac>=threshold) %>%
-  select(population, locus, value) %>%
+  dplyr::select(population, locus, value) %>%
   spread(population, value) %>%
   filter(pure_gent!=pure_sys) -> pure_allele_dict               # 44 rows
 

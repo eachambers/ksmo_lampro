@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/3_Analyses/2_Population_genetic_structure/Scripts")
-
 library(devtools)
 # install_github("gbradburd/conStruct", ref="covariance_fix")
 library(conStruct)
@@ -60,6 +58,7 @@ conStruct.data <- structure2conStruct(infile="../conStruct_input_files/n85_ksmo_
 # (3) Calculate geographic distances ------------------------------------------
 
 # Make sure input file is a) long then lat and b) in the same order as the ustr file!
+# The following file requires both lat and long values; contact author if needed
 ksmo_coords <- read_tsv("../conStruct_input_files/ksmo_coords_MD50.txt", col_names=TRUE) # 85 obs.
 ksmo_coords <- as.matrix(ksmo_coords)
 ksmo_geoDist <- rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)

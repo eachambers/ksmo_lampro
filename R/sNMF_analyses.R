@@ -24,14 +24,19 @@ library(cowplot)
 
 # (1) Convert vcf to lfmm file ------------------------------------------------
 
+# Specify path to input data files
+file_lampro_ksmo_alt = "1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.vcf"
+file_lampro_ksmo = "1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.vcf"
+
+
 ### 1435 invariant sites removed
 ksmo_alt_lfmm <- 
-  vcf2lfmm(input.file = "../../1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.vcf", 
+  vcf2lfmm(input.file = file_lampro_ksmo_alt, 
          output.file = "../sNMF_input_files/lampro_ksmo_alterna.lfmm", 
          force = TRUE)
 
 ksmo_lfmm <- 
-  vcf2lfmm(input.file = "../../1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.vcf", 
+  vcf2lfmm(input.file = file_lampro_ksmo, 
            output.file = "../sNMF_input_files/lampro_ksmo.lfmm",
            force = TRUE)
 

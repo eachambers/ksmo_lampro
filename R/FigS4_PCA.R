@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/4_Data_visualization/Scripts")
-
 library(adegenet)
 library(tidyverse)
 library(ggplot2)

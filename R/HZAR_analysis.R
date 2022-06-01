@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/3_Analyses/4_HZAR")
-
 library(quantreg)
 library(MCMCpack)
 library(hzar)
@@ -61,15 +59,15 @@ freq$avg$obs <-
 freq.loadavgmodel <- function(scaling, tails, id=paste(scaling, tails, sep="."))
   freq$avg$models[[id]] <<- hzar.makeCline1DFreq(freq$avg$obs, scaling, tails)
 
-# freq.loadavgmodel("free", "none", "modelI")
-# freq.loadavgmodel("free" , "left", "modelI")
-# freq.loadavgmodel("free" , "right", "modelI")
-# freq.loadavgmodel("free" , "mirror", "modelI")
-# freq.loadavgmodel("free" , "both", "modelI")
-freq.loadavgmodel("fixed", "none", "modelI") # this is the model with the best support
+# freq.loadavgmodel("free", "none", "modelI") # model 1
+# freq.loadavgmodel("free" , "left", "modelI") # model 2
+# freq.loadavgmodel("free" , "right", "modelI") # model 3
+# freq.loadavgmodel("free" , "mirror", "modelI") # model 4
+# freq.loadavgmodel("free" , "both", "modelI") # model 5
+freq.loadavgmodel("fixed", "none", "modelI") # model 6; this is the model with the best support
 
 # Modify models to look at distance we observed data within
-# Data gathered from 0 to 631km; set to -30 and 660; this will adjust the cline center param
+# Data gathered from 0 to 641km; set to -30 and 660; this will adjust the cline center param
 freq$avg$models <- sapply(freq$avg$models,
                           hzar.model.addBoxReq,
                           -30 , 660,
@@ -87,7 +85,6 @@ freq$avg$fitRs$init <- sapply(freq$avg$models,
                               obsData=freq$avg$obs,
                               verbose=FALSE,
                               simplify=FALSE)
-# 0ac 4.8e+01dfg0ac 3.3e+04dfg0ac 3.3e+04dfg0ac 3.3e+04dfg0ac 2.3e+07dfg
 
 # To speed up computation:
 if(require(doMC)){
@@ -300,7 +297,8 @@ freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 320.772177
 # freq$avg$fitRs$chains[[1]]$modelParam$init["tauM"]=0.6743654
 # freq$avg$fitRs$chains[[2]]$modelParam$init["tauM"]=0.2145613
 # freq$avg$fitRs$chains[[3]]$modelParam$init["tauM"]= 0.3934755
-# 
+
+####################### SET deltaM VALUES ######################
 # ## runif(3,0,690) deltaM for model 4
 # freq$avg$fitRs$chains[[1]]$modelParam$init["deltaM"]=279.9647
 # freq$avg$fitRs$chains[[2]]$modelParam$init["deltaM"]=481.7391
@@ -348,7 +346,8 @@ print(hzar.get.ML.cline(freq$avg$analysis$oDG$data.groups$modelI))
 
 # (9) Import data and tidy ----------------------------------------------
 
-dat <- read_tsv("../../4_Data_visualization/data_files_input_into_scripts/admixture_data.txt", col_names = TRUE)
+# admixture_data.txt requires lat and long values; please contact author if needed
+dat <- read_tsv("admixture_data.txt", col_names = TRUE)
 seq <- read_tsv("../3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE, col_types = cols(.default = "c"))
 
 seq %>% 

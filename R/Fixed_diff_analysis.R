@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/3_Analyses/5_Fixed_difference_analysis/")
-
 library(adegenet)
 library(vcfR)
 library(tidyverse)
@@ -37,7 +35,7 @@ theme_set(theme_cowplot())
 # (1) Read in file and convert ------------------------------------------------------------
 
 # File should have 93 individuals and 3173 locus labels
-gl_usnps_all <- gl.read.vcf("./FDA_input_files/lampro_all_usnps_noMD_NOALTALLELES.vcf")
+gl_usnps_all <- gl.read.vcf("FDA_input_files/lampro_all_usnps_noMD_NOALTALLELES.vcf")
 
 # Load data for inds
 sampling <- read_tsv("FDA_input_files/FDA_data.txt", col_names = TRUE)

@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/4_Data_visualization/Scripts")
-
 # install_github("YuLab-SMU/ggtree")
 
 # library(devtools) # just to install ggtree from github
