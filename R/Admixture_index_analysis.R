@@ -1,4 +1,4 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/SuppMaterials/3_Analyses/3_Admixture_index")
+setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/Chambersetal_SuppMaterials/3_Analyses/3_Admixture_index")
 
 library(tidyverse)
 

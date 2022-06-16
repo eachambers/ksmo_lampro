@@ -45,9 +45,9 @@ freq$avg$analysis <- list()
 
 # Create observed data points for average:
 freq$avg$obs <-
-  hzar.doMolecularData1DPops(input_hzar_avg$distance,
-                             input_hzar_avg$avg_pop_sys,
-                             input_hzar_avg$no_samples)
+  hzar.doMolecularData1DPops(distance = input_hzar_avg$distance,
+                             pObs = input_hzar_avg$avg_pop_sys,
+                             nEff = input_hzar_avg$no_samples)
 
 
 
@@ -67,7 +67,7 @@ freq.loadavgmodel <- function(scaling, tails, id=paste(scaling, tails, sep="."))
 freq.loadavgmodel("fixed", "none", "modelI") # model 6; this is the model with the best support
 
 # Modify models to look at distance we observed data within
-# Data gathered from 0 to 641km; set to -30 and 660; this will adjust the cline center param
+# Data gathered from 0 to 642km; set to -30 and 660; this will adjust the cline center param
 freq$avg$models <- sapply(freq$avg$models,
                           hzar.model.addBoxReq,
                           -30 , 660,
@@ -347,7 +347,9 @@ print(hzar.get.ML.cline(freq$avg$analysis$oDG$data.groups$modelI))
 # (9) Import data and tidy ----------------------------------------------
 
 # admixture_data.txt requires lat and long values; please contact author if needed
-dat <- read_tsv("admixture_data.txt", col_names = TRUE)
+dist_data <- read_tsv("admixture_data.txt", col_names = TRUE) %>% 
+  arrange(ordered_no_long)
+
 seq <- read_tsv("../3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE, col_types = cols(.default = "c"))
 
 seq %>% 
@@ -355,37 +357,38 @@ seq %>%
   filter(value != 'N') %>% 
   inner_join(pure_allele_dict, by = 'locus') %>% 
   group_by(sample_ID, population) %>% 
+  # generate proportions according to sample and locus value 
+  # compared to pure dictionary value across all loci
   summarize(frac_gent_ind = sum(value==pure_gent)/n(),
             frac_sys_ind = sum(value==pure_sys)/n()) %>% 
-  filter(population != 'alterna', population !='elapsoides') %>% 
-  left_join(dat %>% 
+  # append on locality info, calculating avg lat and long per group/population
+  left_join(dist_data %>% 
               group_by(SW_onedeglong) %>% 
-              summarize(avg_long = mean(long),
-                        avg_lat = mean(lat)) %>% 
-              rename(population = SW_onedeglong), by = 'population') -> freq_data_inds
-
-dat %>% 
-  filter(SW_onedeglong!="elapsoides",
-         SW_onedeglong!="alterna") %>% 
-  dplyr::select(sample_ID, lat, long) %>% 
-  left_join(freq_data_inds, by = "sample_ID") -> dist_data
+              rename(population = SW_onedeglong)) %>% 
+  # remove outgroup species
+  filter(population != 'alterna', population !='elapsoides') %>% 
+  group_by(sample_ID, population, frac_gent_ind, frac_sys_ind, lat, long) %>% 
+  # create final table with one row per group and a col with no. inds per group
+  summarize(no_samples = n()) %>% 
+  arrange(long) -> freq_data_inds
 
 
 
 # (10) Calculate distances for individual samples -------------------------
 
-coords_inds <-
-  dist_data %>% 
-  dplyr::select(lat, long)
+# Calculate distances
+distance_inds <- geodist(freq_data_inds, measure="geodesic")
 
-distance_inds <- geodist(coords_inds, measure="geodesic")
+# Convert into df, convert from m to km
 distance_inds <- as.data.frame(distance_inds[,1]) %>% 
   summarize(distance = `distance_inds[, 1]`/1000)
 
-plot_data <- cbind(distance_inds, as.data.frame(freq_data_inds))
+plot_data <-
+  cbind(as.data.frame(freq_data_inds %>% 
+                        arrange(long)), distance_inds) %>% 
+  dplyr::select(sample_ID, frac_gent_ind, frac_sys_ind, distance, no_samples, population)
 
 plot_data %>% 
-  mutate(recip_dist = (641.9518-distance)) %>% 
   mutate(color = case_when(population == "ks_1" ~ "#fcae60",
                            population == "ks_2" ~ "#89d062",
                            population == "ks_3" ~ "#35b779",
@@ -394,15 +397,40 @@ plot_data %>%
                            population == "pure_gent" ~ "#b67431",
                            population == "pure_sys" ~ "#a8a2ca")) -> plot_data
 
+# Because HZAR has 0 distance set to average of westernmost group, the ind
+# values need to extend below that so they're plotted correctly
+# How far is the farthest west sample from the pure gent group average?
+plot_data %>% 
+  filter(distance==0) %>% 
+  summarize(sample_ID) -> low_ind
+
+# Get lat/long values for the lowest individual
+freq_data_inds %>% 
+  filter(sample_ID==low_ind)
+
+freq_data_pops %>% 
+  filter(population=="pure_gent")
+
+# Request latitude values from author
+farwest_coords <- c(-102.01200, XXX)
+farwest_avg_coords <- c(-101.12071,XXX)
+
+geodist(farwest_coords, farwest_avg_coords) # 80.23658 km
+
+plot_data %>% 
+  mutate(corr_dist = distance-80.23658) -> plot_data
+
+
 
 # (11) Build and export plot (Fig. S8) ------------------------------------
 
 # Build base plot with HZAR curve and averages per group as black points
-hzar.plot.fzCline(freq$avg$analysis$oDG$data.groups$modelI, pch = 19, xlim = c(0,642),
+# Xlim needs to go low enough to encompass individual samples' distances
+hzar.plot.fzCline(freq$avg$analysis$oDG$data.groups$modelI, pch = 19, xlim = c(-82,675),
                   xlab = "Distance (km)", ylab = "Admixture index")
 
 # Add each individual's data point based on distance
-points(plot_data$recip_dist, plot_data$frac_sys_ind, pch = 19, col=plot_data$color)
+points(plot_data$corr_dist, plot_data$frac_sys_ind, pch = 19, col=plot_data$color)
 
-# Export the plot 11x6
-ggsave("FigS8_HZAR.pdf", width=11, height=6)
+# Export the plot 6x4
+ggsave("FigS8_HZAR.pdf", width=6, height=4)

@@ -38,15 +38,20 @@ seq %>%
   filter(value != 'N') %>% 
   inner_join(pure_allele_dict, by = 'locus') %>% 
   group_by(sample_ID, population) %>% 
+  # generate proportions according to sample and locus value 
+  # compared to pure dictionary value across all loci
   summarize(frac_gent_ind = sum(value==pure_gent)/n(),
             frac_sys_ind = sum(value==pure_sys)/n()) %>% 
-  filter(population != 'alterna', population !='elapsoides') %>% 
+  # append on locality info, calculating avg lat and long per group/population
   left_join(dist_data %>% 
               group_by(SW_onedeglong) %>% 
               summarize(avg_long = mean(long),
                         avg_lat = mean(lat)) %>% 
-              rename(population = SW_onedeglong), by = 'population') %>% 
+              rename(population = SW_onedeglong)) %>% 
+  # remove outgroup species
+  filter(population != 'alterna', population !='elapsoides') %>% 
   group_by(population, avg_long, avg_lat) %>% 
+  # create final table with one row per group and a col with no. inds per group
   summarize(avg_pop_sys = mean(frac_sys_ind),
             avg_pop_gent = mean(frac_gent_ind),
             no_samples = n()) -> freq_data_pops
@@ -55,14 +60,19 @@ seq %>%
 
 # (3) Calculate distances -------------------------------------------------
 
-# Calculate distances between populations
+# Extract lat, long, and population values, making sure that ordering
+# is according to longitudinal grouping (this is how geodist will set 0)
 coords_pops <-
   freq_data_pops %>% 
   dplyr::select(avg_lat, avg_long) %>% 
   rename(lat = avg_lat,
-         long = avg_long)
+         long = avg_long) %>% 
+  arrange(long)
 
+# Calculate distances
 distance_pops <- geodist(coords_pops, measure="geodesic")
+
+# Convert into df, convert from m to km as required by HZAR
 distance_pops <- as.data.frame(distance_pops[,1]) %>% 
   summarize(distance = `distance_pops[, 1]`/1000)
 
@@ -72,5 +82,7 @@ distance_pops <- as.data.frame(distance_pops[,1]) %>%
 
 # Combine group, average admixture index values, distances, and no. samples together:
 input_hzar_avg <-
-  cbind(as.data.frame(freq_data_pops), distance_pops) %>% 
+  cbind(as.data.frame(freq_data_pops %>% 
+                        arrange(avg_long)), distance_pops) %>% 
   dplyr::select(population, avg_pop_sys, avg_pop_gent, distance, no_samples)
+

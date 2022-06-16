@@ -12,6 +12,7 @@ library(fields)
 ##    (2) Converts a Structure file (.ustr) to conStruct file (allele freq data)
 ##    (3) Calculates geographic distances between samples
 ##    (4) Runs conStruct
+##    (5) Runs cross-validation analysis comparing spatial and non-spatial models
 
 ##    FILES REQUIRED:
 ##            ../../../1_Bioinformatics/iPyrad_output_files/all_lampro_pruned.ustr
@@ -58,7 +59,7 @@ conStruct.data <- structure2conStruct(infile="../conStruct_input_files/n85_ksmo_
 # (3) Calculate geographic distances ------------------------------------------
 
 # Make sure input file is a) long then lat and b) in the same order as the ustr file!
-# The following file requires both lat and long values; contact author if needed
+# The following requires lat/long values; please contact author if needed
 ksmo_coords <- read_tsv("../conStruct_input_files/ksmo_coords_MD50.txt", col_names=TRUE) # 85 obs.
 ksmo_coords <- as.matrix(ksmo_coords)
 ksmo_geoDist <- rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
@@ -78,3 +79,53 @@ k2_ksmo <- conStruct(spatial = TRUE,
                         n.iter = 12000,
                         make.figs = TRUE,
                         save.files = TRUE)
+
+
+
+# (5) Cross-validation analysis -------------------------------------------
+
+# Run x-validation analysis
+my.xvals <- x.validation(train.prop = 0.8,
+                         n.reps = 8,
+                         K = 2,
+                         freqs = freqs,
+                         data.partitions = NULL,
+                         geoDist = md50_ksmo_geoDist,
+                         coords = md50_ksmo_coords,
+                         prefix = "md50_ksmo",
+                         control = setNames(list(0.9),"adapt_delta"),
+                         n.iter = 5000,
+                         make.figs = TRUE,
+                         save.files = FALSE,
+                         parallel = TRUE,
+                         n.nodes = 4)
+
+# Read in results of xvalid analysis from text files
+sp.results <- as.matrix(
+  read.table("md50_ksmo_sp_xval_results.txt",
+             header = TRUE,
+             stringsAsFactors = FALSE)
+)
+
+nsp.results <- as.matrix(
+  read.table("md50_ksmo_nsp_xval_results.txt",
+             header = TRUE,
+             stringsAsFactors = FALSE)
+)
+
+# First, get the 95% confidence intervals for the spatial and nonspatial
+#	models over values of K (mean +/- 1.96 the standard error)
+sp.CIs <- apply(sp.results,1,function(x){mean(x) + c(-1.96,1.96) * sd(x)/length(x)})
+nsp.CIs <- apply(nsp.results,1,function(x){mean(x) + c(-1.96,1.96) * sd(x)/length(x)})
+
+# Then, plot cross-validation results with 8 replicates
+par(mfrow=c(1,3))
+
+plot(rowMeans(sp.results),
+     pch=19,col="dodgerblue3",
+     ylab="",xlab="",
+     ylim=range(sp.results,nsp.results),
+     main="")
+
+points(rowMeans(nsp.results),col="darkorange2",pch=19)
+
