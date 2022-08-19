@@ -1,6 +1,5 @@
 library(devtools)
 library(tidyverse)
-library(ggplot2)
 library(cowplot)
 
 theme_set(theme_cowplot())

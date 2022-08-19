@@ -1,5 +1,3 @@
-setwd("~/Box Sync/Lampropeltis project/Writing_gent:tri/Chambersetal_SuppMaterials/3_Analyses/3_Admixture_index")
-
 library(tidyverse)
 
 ## The following code calculates the admixture index values for samples.

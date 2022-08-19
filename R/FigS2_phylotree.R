@@ -2,7 +2,6 @@
 
 # library(devtools) # just to install ggtree from github
 library(ggtree)
-library(ggplot2)
 library(tidyverse)
 library(cowplot)
 library(ape)

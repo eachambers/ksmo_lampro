@@ -1,6 +1,5 @@
 library(adegenet)
 library(tidyverse)
-library(ggplot2)
 library(cowplot)
 library(vcfR)
 
