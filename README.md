@@ -1,5 +1,5 @@
 # Contact zones in the American Milksnake
-This repository contains code for analyses and data visualization from Chambers et al. (2022) on resolving species boundaries in the *Lampropeltis triangulum* complex in the United States. All raw data and input files can be found on Dryad [here](https://doi.org/10.5061/dryad.9s4mw6mj8).
+This repository contains code for analyses and data visualization from [Chambers et al. (2022)](https://academic.oup.com/sysbio/advance-article-abstract/doi/10.1093/sysbio/syac056/6673165?redirectedFrom=fulltext) on resolving species boundaries in the *Lampropeltis triangulum* complex in the United States. All raw data and input files can be found on Dryad [here](https://doi.org/10.5061/dryad.9s4mw6mj8).
 
 *Please note: for scripts requiring sampling coordinates, latitude values are not provided because of concerns related to the commercial exploitation of these animals; I can provide latitude values to qualified investigators upon request for the purposes of re-analysis and reproducibility.*
 
