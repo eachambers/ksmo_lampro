@@ -4,16 +4,16 @@ library(hzar)
 library(geodist)
 library(geosphere)
 library(tidyverse)
+library(cowplot)
 
-## The following code follows Generate_HZAR_input_file.R script and runs HZAR (tests a number of cline models) 
+theme_set(theme_cowplot())
+
+## The following code should be run after the Generate_HZAR_input_file.R script and runs HZAR (tests a number of cline models) 
 ## from the admixture index results. Much of the code to run HZAR is adapted from the Manakin tutorial 
-## (Supp. Dataset 1) from Derryberry et al. (2014) MER 14:652-663. This also builds Fig. S8.
+## (Supp. Dataset 1) from Derryberry et al. (2014) MER 14:652-663.
 
 ##    FILES REQUIRED:
 ##          input_hzar_avg object from the Generate_HZAR_input_file.R script [TO RUN HZAR]
-##          pure_allele_dict object from Admixture_index_analysis.R script [TO BUILD FIGURE S8]
-##          ../../4_Data_visualization/data_files_input_into_scripts/admixture_data.txt [TO BUILD FIGURE S8]
-##          ../3_Admixture_index/admix_index_input_files/seq_data.txt [TO BUILD FIGURE S8]
 
 ##    STRUCTURE OF CODE:
 ##              (1) Make empty lists and input observed data
@@ -24,15 +24,15 @@ library(tidyverse)
 ##              (6) Run a chain of 3 runs for every fit request
 ##              (7) Check for model convergence
 ##              (8) Aggregate data for analysis
-##              (9) Import data files and tidy them
-##              (10) Calculate distances for individual samples (for plotting)
-##              (11) Build plot (Fig. S8)
+##              (9) Save best model object
 
 
 
 # (1) Make lists and input observed data -----------------------------------------------
 
-# For average frequency data (freq$avg)
+load("3_Analyses/4_HZAR/input_hzar_avg.rda")
+
+# Make list for average frequency data (freq$avg)
 if(length(apropos("^freq$",ignore.case=FALSE)) == 0 ||
    !is.list(freq) ) freq <- list()
 
@@ -93,7 +93,7 @@ if(require(doMC)){
   registerDoSEQ();
 }
 
-chainLength=1e5
+chainLength = 1e5
 
 # Each model will run off separate seeds:
 # sample(1:1000, 6, replace=FALSE)
@@ -317,7 +317,7 @@ freq$avg$runs$chains <- hzar.doChain.multi(freq$avg$fitRs$chains,
 # (7) Check for model convergence ---------------------------------------------
 
 summary(do.call(mcmc.list,
-                lapply(freq$avg$runs$chains[1:3], # model I: chains 1-3; model II: chains 4-6, etc.
+                lapply(freq$avg$runs$chains[1:3],
                        function(x)hzar.mcmc.bindLL(x[[3]]))))
 
 
@@ -344,93 +344,7 @@ print(hzar.getLLCutParam(freq$avg$analysis$oDG$data.groups$modelI,
 print(hzar.get.ML.cline(freq$avg$analysis$oDG$data.groups$modelI))
 
 
-# (9) Import data and tidy ----------------------------------------------
 
-# admixture_data.txt requires lat and long values; please contact author if needed
-dist_data <- read_tsv("admixture_data.txt", col_names = TRUE) %>% 
-  arrange(ordered_no_long)
+# (9) Save best model object ----------------------------------------------
 
-seq <- read_tsv("../3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE, col_types = cols(.default = "c"))
-
-seq %>% 
-  gather(locus, value, -population, -sample_ID, -read_data) %>% 
-  filter(value != 'N') %>% 
-  inner_join(pure_allele_dict, by = 'locus') %>% 
-  group_by(sample_ID, population) %>% 
-  # generate proportions according to sample and locus value 
-  # compared to pure dictionary value across all loci
-  summarize(frac_gent_ind = sum(value==pure_gent)/n(),
-            frac_sys_ind = sum(value==pure_sys)/n()) %>% 
-  # append on locality info, calculating avg lat and long per group/population
-  left_join(dist_data %>% 
-              group_by(SW_onedeglong) %>% 
-              rename(population = SW_onedeglong)) %>% 
-  # remove outgroup species
-  filter(population != 'alterna', population !='elapsoides') %>% 
-  group_by(sample_ID, population, frac_gent_ind, frac_sys_ind, lat, long) %>% 
-  # create final table with one row per group and a col with no. inds per group
-  summarize(no_samples = n()) %>% 
-  arrange(long) -> freq_data_inds
-
-
-
-# (10) Calculate distances for individual samples -------------------------
-
-# Calculate distances
-distance_inds <- geodist(freq_data_inds, measure="geodesic")
-
-# Convert into df, convert from m to km
-distance_inds <- as.data.frame(distance_inds[,1]) %>% 
-  summarize(distance = `distance_inds[, 1]`/1000)
-
-plot_data <-
-  cbind(as.data.frame(freq_data_inds %>% 
-                        arrange(long)), distance_inds) %>% 
-  dplyr::select(sample_ID, frac_gent_ind, frac_sys_ind, distance, no_samples, population)
-
-plot_data %>% 
-  mutate(color = case_when(population == "ks_1" ~ "#fcae60",
-                           population == "ks_2" ~ "#89d062",
-                           population == "ks_3" ~ "#35b779",
-                           population == "ks_4" ~ "#22908c",
-                           population == "ks_5" ~ "#443a83",
-                           population == "pure_gent" ~ "#b67431",
-                           population == "pure_sys" ~ "#a8a2ca")) -> plot_data
-
-# Because HZAR has 0 distance set to average of westernmost group, the ind
-# values need to extend below that so they're plotted correctly
-# How far is the farthest west sample from the pure gent group average?
-plot_data %>% 
-  filter(distance==0) %>% 
-  summarize(sample_ID) -> low_ind
-
-# Get lat/long values for the lowest individual
-freq_data_inds %>% 
-  filter(sample_ID==low_ind)
-
-freq_data_pops %>% 
-  filter(population=="pure_gent")
-
-# Request latitude values from author
-farwest_coords <- c(-102.01200, XXX)
-farwest_avg_coords <- c(-101.12071,XXX)
-
-geodist(farwest_coords, farwest_avg_coords) # 80.23658 km
-
-plot_data %>% 
-  mutate(corr_dist = distance-80.23658) -> plot_data
-
-
-
-# (11) Build and export plot (Fig. S8) ------------------------------------
-
-# Build base plot with HZAR curve and averages per group as black points
-# Xlim needs to go low enough to encompass individual samples' distances
-hzar.plot.fzCline(freq$avg$analysis$oDG$data.groups$modelI, pch = 19, xlim = c(-82,675),
-                  xlab = "Distance (km)", ylab = "Admixture index")
-
-# Add each individual's data point based on distance
-points(plot_data$corr_dist, plot_data$frac_sys_ind, pch = 19, col=plot_data$color)
-
-# Export the plot 6x4
-ggsave("FigS8_HZAR.pdf", width=6, height=4)
+save(freq, file = "3_Analyses/4_HZAR/hzar_best_model.rda")

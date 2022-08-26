@@ -11,7 +11,7 @@ theme_set(theme_cowplot())
 ## Armstrong et al. (2001).
 
 ##    FILES REQUIRED:
-##          ../data_files_input_into_scripts/armstrong_data.txt
+##          4_Data_visualization/data_files_input_into_scripts/armstrong_data.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Import data
@@ -22,7 +22,7 @@ theme_set(theme_cowplot())
 
 # (1) Import data ---------------------------------------------------------
 
-dat <- read_tsv("../data_files_input_into_scripts/armstrong_data.txt", col_names = TRUE)
+dat <- read_tsv("4_Data_visualization/data_files_input_into_scripts/armstrong_data.txt", col_names = TRUE)
 
 
 

@@ -9,7 +9,7 @@ theme_set(theme_cowplot())
 ##    FILES REQUIRED:
 ##    freq_data object from Admixture_index_analysis.R script
 ##    seq object from Admixture_index_analysis.R script
-##    ../data_files_input_into_scripts/admixture_data.txt
+##    3_Analyses/metadata_ksmo.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Plot per locus admixture index values (Fig. 3C)
@@ -20,7 +20,11 @@ theme_set(theme_cowplot())
 
 # (1) Plot per locus admixture index values (Fig. 3C) ---------------------------------------------
 
-dat <- read_tsv("../data_files_input_into_scripts/admixture_data.txt", col_names = TRUE)
+# Load objects
+load("4_Data_visualization/data_files_input_into_scripts/freq_data.rda")
+load("4_Data_visualization/data_files_input_into_scripts/seq.rda")
+
+dat <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE)
 
 freq_data %>% 
   left_join(dat %>% 
@@ -36,9 +40,6 @@ freq_data %>%
         legend.position = "none")
 
 ggsave("Fig3C_freq_data_lines.pdf", width=11, height=6)
-
-# write_tsv(freq_data, "freq_data_per_locus.txt")
-
 
 
 # (2) Get per individual averages across all loci -----------------------------
@@ -56,9 +57,6 @@ seq %>%
               summarize(avg_long = mean(long),
                         avg_lat = mean(lat)) %>% 
               rename(population = SW_onedeglong), by = 'population') -> freq_data_inds
-
-# write_csv(freq_data_inds, "freq_data_inds.csv")
-
 
 
 # (3) Build histograms with per ind data (Fig. 3B) --------------------------------------------------------
@@ -107,8 +105,12 @@ freq_data %>%
   ggplot(aes(long, avg_freq)) + 
   geom_smooth(method="auto", se=TRUE, level=0.95, color="black")
 
+dat_joined <-
+  dat %>% 
+  full_join(freq_data_inds)
+
 p_avg_smoothed +
-  geom_point(data=freq_data_inds, aes(x=long, y=frac_sys_ind, group=population, color=population), size=3, alpha=.8) +
+  geom_point(data=dat_joined, aes(x=long, y=frac_sys_ind, group=population, color=population), size=3, alpha=.8) +
   scale_color_manual(values=colors) +
   xlab("Longitude") +
   ylab("Admixture index") +

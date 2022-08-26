@@ -1,13 +1,9 @@
-library(adegenet)
-library(vcfR)
 library(tidyverse)
 library(dartR)
-library(plotly)
-library(directlabels)
-library(ggthemes)
-library(pheatmap)
+library(SNPRelate)
 library(cowplot)
 library(viridis)
+library(harrietr)
 
 theme_set(theme_cowplot())
 
@@ -15,10 +11,10 @@ theme_set(theme_cowplot())
 ## and generates heat maps based on fixed differences (Figs. S9 and S10).
 
 ##    FILES REQUIRED:
-##          D_all (pre-collapsed groups; results from Fixed_diff_analysis.R)
-##          D_all_3 (post-collapsed groups; results from Fixed_diff_analysis.R)
-##          sampling (results from Fixed_diff_analysis.R)
-##          ../data_input_files_scripts/FDA_data.txt
+##          4_Data_visualization/data_files_input_into_scripts/D_all.rda (pre-collapsed groups; results from Fixed_diff_analysis.R)
+##          4_Data_visualization/data_files_input_into_scripts/D_all_3.rda (post-collapsed groups; results from Fixed_diff_analysis.R)
+##          4_Data_visualization/data_files_input_into_scripts/D_all_inds.rda (each ind assigned a pop; results from Fixed_diff_analysis.R)
+##          3_Analyses/metadata_n93.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Run PCoA for pre- and post-collapsed groups
@@ -28,32 +24,35 @@ theme_set(theme_cowplot())
 ##              (5) Export heat maps (Figs. S9 and S10)
 
 
-# Remove hybrid individual for visualizations
-sampling_nohyb <-
-  sampling %>% 
+
+# Import and load data ----------------------------------------------------
+
+# Import metadata and remove hybrid individual for visualizations
+sampling_nohyb <- read_tsv("3_Analyses/metadata_n93.txt", col_names = TRUE) %>% 
   filter(!sample_ID=="alt17w4f_TX")
 
+# Load results from fixed diff analysis
+load("4_Data_visualization/data_files_input_into_scripts/D_all.rda")
+load("4_Data_visualization/data_files_input_into_scripts/D_all_3.rda")
+load("4_Data_visualization/data_files_input_into_scripts/D_all_inds.rda")
 
 
 # (1) Run PCoA ----------------------------------------------------------------
 
 # Post-collapsed
-pca <- gl.pcoa(D_all_3)
+pca <- dartR::gl.pcoa(D_all_3)
 
 # Pre-collapsed
-pca_pre <- gl.pcoa(D_all)
-
+pca_pre <- dartR::gl.pcoa(D_all)
 
 
 # (2) Build PCoA plots -------------------------------------------------------
 
-colors_pre <- c("ks_1"="#dd8666", "ks_2"="#fcae60", "ks_3"="#e9d207", "ks_4"="#fcae60", "ks_5"="#89d062", 
-                "ks_6"="#35b779", "ks_7"="#22908c", "ks_8"="#443a83",
+colors_pre <- c("ks_1"="#fcae60", "ks_2"="#89d062", "ks_3"="#35b779", "ks_4"="#22908c", "ks_5"="#443a83",
                 "pure_gent"="#b67431", "pure_sys"="#a8a2ca", "alterna"="gray74", "elapsoides"="gray30")
 
-colors_collapsed <- c("ks_1"="#22908c", "ks_2"="#22908c", "ks_3"="#22908c", "ks_4"="#22908c", "ks_5"="#22908c", 
-                      "ks_6"="#22908c", "ks_7"="#22908c", "ks_8"="#22908c",
-                      "pure_gent"="#22908c", "pure_sys"="#22908c", 
+colors_collapsed <- c("ks_1"="gray50", "ks_2"="gray50", "ks_3"="gray50", "ks_4"="gray50", "ks_5"="gray50", 
+                      "pure_gent"="gray50", "pure_sys"="gray50", 
                       "alterna"="gray74", "elapsoides"="gray30")
 
 pcoa_collapsed <-
@@ -90,24 +89,29 @@ ggsave("Fig4b_PCoA_FDA_collapsed.pdf", width=5, height=4)
 
 # (4) Build heat maps ---------------------------------------------------------------
 
+# Ordering for sample_ID_comp
 order <- 
   sampling_nohyb %>% 
   dplyr::select(sample_ID, ordered_no_long) %>% 
-  rename(samples = sample_ID,
+  rename(sample_ID_comp = sample_ID,
          ordered_no_long_new = ordered_no_long)
 
-# Looking at fixed diffs among each individual
-dat <-
-  as_tibble(cbind(D_all_inds$fd, sampling_nohyb)) %>%
-  pivot_longer(-c(sample_ID, SW_onedeglong, ordered_no_long, ordered_no_vcf), 
-               names_to = "samples", values_to = "fixed_diffs")
-
-# Build heat map (Fig. S9)
-hm_inds <-
-  left_join(dat, order, by="samples") %>% 
+# Tidy and process data, joining FDs with sample metadata
+dat <- as.data.frame(as.matrix(D_all_inds$fd)) %>% 
+  rownames_to_column("sample_ID") %>% 
+  left_join(sampling_nohyb %>% 
+              dplyr::select(sample_ID, ordered_no_long, SW_onedeglong)) %>% 
+  as_tibble() %>% 
+  pivot_longer(-c(sample_ID, SW_onedeglong, ordered_no_long), 
+               names_to = "sample_ID_comp", values_to = "fixed_diffs") %>% 
+  left_join(order, by="sample_ID_comp") %>% 
   mutate(sample_ID = fct_reorder(as.factor(sample_ID), ordered_no_long),
-         samples = fct_reorder(as.factor(samples), ordered_no_long_new)) %>% 
-  ggplot(aes(x=samples, y=sample_ID, fill=fixed_diffs)) +
+         sample_ID_comp = fct_reorder(as.factor(sample_ID_comp), ordered_no_long_new))
+
+### Build individual-level heat map (Fig. S9)
+hm_inds <-
+  dat %>% 
+  ggplot(aes(x=sample_ID, y=sample_ID_comp, fill=fixed_diffs)) +
   geom_tile() +
   scale_fill_viridis(option="mako", direction = -1) +
   theme(panel.border = element_rect(fill=NA, colour="darkgrey", linetype="solid", size=2),
@@ -125,21 +129,25 @@ hm_inds <-
 # For ordering samples in the heat map:
 pop_order <- c("alterna", "pure_gent", "ks_1", "ks_2", "ks_3", "ks_4", "ks_5", "pure_sys", "elapsoides")
 
-dat <- as.data.frame(cbind(D_all$fd, comp_pop=rownames(D_all$fd))) %>% 
-  pivot_longer(-comp_pop, names_to = "population", values_to = "fixed_diffs")
+dat_pops <- as.data.frame(as.matrix(D_all$fd)) %>% 
+  rownames_to_column("SW_onedeglong") %>% 
+  as_tibble() %>% 
+  pivot_longer(-SW_onedeglong, 
+               names_to = "comp_pop", values_to = "fixed_diffs")
 
-levels(dat$comp_pop) = pop_order
-levels(dat$population) = pop_order
+dat_pops$comp_pop <- factor(dat_pops$comp_pop, levels = pop_order)
+dat_pops$SW_onedeglong = factor(dat_pops$SW_onedeglong, levels = pop_order)
 
-# Build heat map for fixed diffs among groups (Fig. S10)
+## Build heat map for fixed diffs among groups (Fig. S10)
 hm_groups <-
-  dat %>% 
-  ggplot(aes(x=comp_pop, y=population, fill=as.numeric(fixed_diffs))) +
+  dat_pops %>% 
+  ggplot(aes(x=as.factor(comp_pop), y=as.factor(SW_onedeglong), fill=as.numeric(fixed_diffs))) +
   geom_tile() +
   scale_fill_viridis(option="mako", direction = -1) +
   theme(panel.border = element_rect(fill=NA, colour="darkgrey", linetype="solid", size=2),
         axis.title=element_blank(),
         axis.text.y=element_text(size=12),
+        axis.text.x=element_text(angle = 90),
         legend.text = element_text(size=16),
         legend.title = element_text(size=16),
         axis.line = element_line(color="darkgrey"),

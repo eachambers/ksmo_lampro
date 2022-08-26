@@ -11,18 +11,17 @@ library(scales)
 theme_set(theme_cowplot())
 
 ## The following code generates the phylogenetic tree for the Lampropeltis dataset.
-## Code written by E. Anne Chambers
 
 ##    FILES REQUIRED:
-##          ../3_Analyses/1_RAxML_output_files/lampro_n93_noMD.phy.raxml.support.tree
-##          ../data_files_input_into_scripts/tree_coding_data.txt
+##          3_Analyses/1_RAxML_output_files/lampro_n93_noMD.phy.raxml.support.tree
+##          4_Data_visualization/data_files_input_into_scripts/tree_coding_data.txt
 
 
 
 # Import trees ------------------------------------------------------------
 
-# tree <- read.nexus("../../1_Bioinformatics/iPyrad_output_files/n93_no_missing_data/all_lampro_n93_noMD.nexus")
-tree <- read.tree("../../3_Analyses/1_RAxML_output_files/lampro_n93_noMD.phy.raxml.support.tree")
+# tree <- read.nexus("1_Bioinformatics/iPyrad_output_files/n93_no_missing_data/all_lampro_n93_noMD.nexus")
+tree <- read.tree("3_Analyses/1_RAxML_output_files/lampro_n93_noMD.phy.raxml.support.tree")
 
 ## Check node numbering
 ggtree(tree) +
@@ -57,7 +56,10 @@ tree_edges <- c(tree_rooted$edge[,1], tree_rooted$edge[,2]) # pull out nodes con
 as.data.frame(table(tree_edges)) # count frequency of nodes; tips will only occur once
 
 # Import data for color-coding
-dat <- read_tsv("../data_files_input_into_scripts/tree_coding_data.txt", col_names = TRUE)
+dat <- read_tsv("4_Data_visualization/data_files_input_into_scripts/tree_coding_data.txt", col_names = TRUE)
+
+dat <- read_tsv("3_Analyses/metadata_n93.txt", col_names = TRUE) %>% 
+  dplyr::select(sample_ID, SW_onedeglong)
 
 # Tip nodes are numbered based on the order samples occur in tree$tip.label.
 # Get the node numbering for samples:
@@ -66,15 +68,15 @@ node_order <-
   rename(sample_ID = "tree_rooted$tip.label") %>% 
   mutate(node=c(1:93)) %>% 
   left_join(dat, by = "sample_ID") %>% 
-  mutate(color = case_when(population == "ks_1" ~ "#fcae60",
-                           population == "ks_2" ~ "#89d062",
-                           population == "ks_3" ~ "#35b779",
-                           population == "ks_4" ~ "#22908c",
-                           population == "ks_5" ~ "#443a83",
-                           population == "pure_gent" ~ "#b67431",
-                           population == "pure_sys" ~ "#a8a2ca",
-                           population == "alterna" ~ "gray74",
-                           population == "elapsoides" ~ "gray30"))
+  mutate(color = case_when(SW_onedeglong == "ks_1" ~ "#fcae60",
+                           SW_onedeglong == "ks_2" ~ "#89d062",
+                           SW_onedeglong == "ks_3" ~ "#35b779",
+                           SW_onedeglong == "ks_4" ~ "#22908c",
+                           SW_onedeglong == "ks_5" ~ "#443a83",
+                           SW_onedeglong == "pure_gent" ~ "#b67431",
+                           SW_onedeglong == "pure_sys" ~ "#a8a2ca",
+                           SW_onedeglong == "alterna" ~ "gray74",
+                           SW_onedeglong == "elapsoides" ~ "gray30"))
 
 # Also add remaining (internal nodes) so they show up colored on the tree
 # max(tree_rooted$edge[,1]) # max is 184

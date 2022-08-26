@@ -7,7 +7,7 @@ theme_set(theme_cowplot())
 
 ##    FILES REQUIRED:
 ##    Sample IDs, coordinates, and group assignment:
-##          ../data_files_input_into_scripts/admixture_data.txt
+##          3_Analyses/metadata_ksmo.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Import data
@@ -18,7 +18,7 @@ theme_set(theme_cowplot())
 
 # (1) Import data ---------------------------------------------------------
 
-dat <- read_tsv("../data_files_input_into_scripts/admixture_data.txt", col_names = TRUE)
+dat <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE)
 
 
 
@@ -44,7 +44,7 @@ p_base <-
 
 p_full <-
   p_base +
-  geom_point(data = dat, aes(long, lat, group=SW_onedeglong, color=SW_onedeglong), size = 4, alpha=.8) +
+  geom_point(data = dat, aes(long, lat, group=SW_onedeglong, color=SW_onedeglong), size = 7, alpha=.8) +
   scale_color_manual(values=colors)
 
 

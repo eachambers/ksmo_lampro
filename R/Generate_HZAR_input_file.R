@@ -1,15 +1,19 @@
 library(quantreg)
 library(MCMCpack)
+# install_github("GrahamDB/hzar")
 library(hzar)
 library(geodist)
 library(geosphere)
 library(tidyverse)
+library(cowplot)
+
+theme_set(theme_cowplot())
 
 ## The following code generates the HZAR input files.
 
 ##    FILES REQUIRED:
-##          ../3_Admixture_index/admix_index_input_files/seq_data.txt
-##          ../../4_Data_visualization/data_files_input_into_scripts/admixture_data.txt
+##          3_Analyses/3_Admixture_index/admix_index_input_files/seq_data.txt
+##          3_Analyses/metadata_ksmo.txt
 ##          pure_allele_dict object from Admixture_index_analysis.R script
 
 
@@ -23,11 +27,14 @@ library(tidyverse)
 
 # (1) Import data ---------------------------------------------------------
 
-# Below requires both lat/long data; contact the author if needed
-dist_data <- read_tsv("admixture_data.txt", col_names = TRUE) %>% 
-  arrange(ordered_no_long)
+load("3_Analyses/3_Admixture_index/pure_allele_dict.rda")
 
-seq <- read_tsv("../3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE)
+# Below requires both lat/long data; contact the author if needed
+dat <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE) %>% 
+  arrange(ordered_no_long) %>% 
+  dplyr::select(sample_ID, lat, long, SW_onedeglong)
+
+seq <- read_tsv("3_Analyses/3_Admixture_index/admix_index_input_files/seq_data.txt", col_names = TRUE)
 
 
 
@@ -43,7 +50,7 @@ seq %>%
   summarize(frac_gent_ind = sum(value==pure_gent)/n(),
             frac_sys_ind = sum(value==pure_sys)/n()) %>% 
   # append on locality info, calculating avg lat and long per group/population
-  left_join(dist_data %>% 
+  left_join(dat %>% 
               group_by(SW_onedeglong) %>% 
               summarize(avg_long = mean(long),
                         avg_lat = mean(lat)) %>% 
@@ -55,6 +62,9 @@ seq %>%
   summarize(avg_pop_sys = mean(frac_sys_ind),
             avg_pop_gent = mean(frac_gent_ind),
             no_samples = n()) -> freq_data_pops
+
+# Save object to use in generating Fig. S8
+save(freq_data_pops, file = "3_Analyses/4_HZAR/freq_data_pops.rda")
 
 
 
@@ -70,7 +80,7 @@ coords_pops <-
   arrange(long)
 
 # Calculate distances
-distance_pops <- geodist(coords_pops, measure="geodesic")
+distance_pops <- geodist::geodist(coords_pops, measure="geodesic")
 
 # Convert into df, convert from m to km as required by HZAR
 distance_pops <- as.data.frame(distance_pops[,1]) %>% 
@@ -86,3 +96,4 @@ input_hzar_avg <-
                         arrange(avg_long)), distance_pops) %>% 
   dplyr::select(population, avg_pop_sys, avg_pop_gent, distance, no_samples)
 
+save(input_hzar_avg, file = "3_Analyses/4_HZAR/input_hzar_avg.rda")

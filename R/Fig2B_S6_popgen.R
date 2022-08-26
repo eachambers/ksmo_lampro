@@ -10,10 +10,10 @@ theme_set(theme_cowplot())
 
 ##    FILES REQUIRED:
 ##    Results from snmf analysis (ancestry proportions (from Q matrices), lat, long, sample ID):
-##          ../data_files_input_into_scripts/lampro_ksmo_alt_k3_run1_data.txt
-##          ../data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt
+##          4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_alt_k3_run1_data.txt
+##          4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt
 ##    Results from conStruct analysis:
-##          ../data_files_input_into_scripts/conStruct_k2_results.txt
+##          4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Imports data
@@ -28,13 +28,13 @@ theme_set(theme_cowplot())
 # Upload data and define variables
 
 ### Visualization (1): sNMF KS-MO and alterna
-k3_data_ksmoalt <- read_tsv("../data_files_input_into_scripts/lampro_ksmo_alt_k3_run1_data.txt", col_names = TRUE)
+k3_data_ksmoalt <- read_tsv("4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_alt_k3_run1_data.txt", col_names = TRUE)
 
 ### Visualization (2): sNMF KS-MO contact zone samples
-k2_data_ksmo <- read_tsv("../data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt", col_names = TRUE)
+k2_data_ksmo <- read_tsv("4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt", col_names = TRUE)
 
-### conStruct visualization: ks-mo
-k2_construct_ksmo <- read_tsv("../data_files_input_into_scripts/conStruct_k2_results.txt", col_names = TRUE)
+### Visualization (3): conStruct KS-MO contact zone samples
+k2_construct_ksmo <- read_tsv("4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt", col_names = TRUE)
 
 
 
@@ -42,7 +42,7 @@ k2_construct_ksmo <- read_tsv("../data_files_input_into_scripts/conStruct_k2_res
 
 tidy_structure_data <- function(data){
   data %>% 
-    gather(key="cluster", value="proportion", -ordered_no_long, -ordered_no_lat, -ordered_no_vcf, -sample_ID, -long, -lat)
+    gather(key="cluster", value="proportion", -ordered_no_long, -ordered_no_vcf, -sample_ID, -long, -lat)
 }
 
 ### Visualization (1): KS-MO and alterna
@@ -80,7 +80,7 @@ structure_plot <- function(data, colors, order) {
 }
 
 
-# Define colors
+### Define colors
 #318c84 # green (alterna)
 #a8a2ca # purple (syspila)
 #b67431 # brown (gentilis)

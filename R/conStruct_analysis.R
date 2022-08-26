@@ -15,18 +15,18 @@ library(fields)
 ##    (5) Runs cross-validation analysis comparing spatial and non-spatial models
 
 ##    FILES REQUIRED:
-##            ../../../1_Bioinformatics/iPyrad_output_files/all_lampro_pruned.ustr
+##            1_Bioinformatics/iPyrad_output_files/all_lampro_pruned.ustr
 ##      Geographic sampling coordinates (long, lat) in tsv format and in order of VCF file:
-##            ../conStruct_input_files/ksmo_coords_MD50.txt
+##            3_Analyses/metadata_ksmo.txt
 
 
 
 # (1) Create subsampled datasets ----------------------------------------------
 
 # Load ustr file; 210 obs. (105 samples) and 3254 variables
-all_data <- read_tsv("../../../1_Bioinformatics/iPyrad_output_files/all_lampro_pruned.ustr", col_names=FALSE)
+all_data <- read_tsv("1_Bioinformatics/iPyrad_output_files/n105_all_samples/all_lampro_pruned.ustr", col_names=FALSE)
 
-# remove >50% MD samples (n=12)
+# Remove >50% MD samples (n=12)
 MD_50_remove_samples <- c("F10982_KS", "F10983_KS", "F8366_KS", "F9743_KS",
                    "F10984_KS", "F11005_KS", "F10996_KS", "F8504_KS",
                    "F13643_KS", "F14200_KS", "F10981_KS", "F10987_KS")
@@ -40,19 +40,19 @@ MD50_ksmo <-
          grepl("_MO", `X1`))
 
 # Save the modified file
-write_delim(MD50_ksmo, "../conStruct_input_files/n85_ksmo_MD50.ustr", col_names=FALSE)
+write_delim(MD50_ksmo, "3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50.ustr", col_names=FALSE)
 
 
 
 # (2) Convert ustr to conStruct file ------------------------------------------
 
 # Saves an RData file in working directory
-conStruct.data <- structure2conStruct(infile="../conStruct_input_files/n85_ksmo_MD50.ustr",
+conStruct.data <- structure2conStruct(infile="3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50.ustr",
                                       start.loci=2, # first col that contains data
                                       start.samples=1, # first row that contains samples
                                       onerowperind=FALSE, # two rows per individual
                                       missing.datum=-9, # missing data
-                                      outfile="../conStruct_input_files/n85_ksmo_MD50")
+                                      outfile="3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50")
 
 
 
@@ -60,13 +60,18 @@ conStruct.data <- structure2conStruct(infile="../conStruct_input_files/n85_ksmo_
 
 # Make sure input file is a) long then lat and b) in the same order as the ustr file!
 # The following requires lat/long values; please contact author if needed
-ksmo_coords <- read_tsv("../conStruct_input_files/ksmo_coords_MD50.txt", col_names=TRUE) # 85 obs.
+ksmo_coords <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE) %>% 
+  dplyr::select(long, lat)
+
 ksmo_coords <- as.matrix(ksmo_coords)
-ksmo_geoDist <- rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
+ksmo_geoDist <- fields::rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
 
 
 
 # (4) Run conStruct -----------------------------------------------------------
+
+# Load frequency data if haven't run above code:
+load("3_Analyses/2_Population_genetic_structure/conStruct_input_files/missing_data_50.RData")
 
 k2_ksmo <- conStruct(spatial = TRUE,
                         K = 2,

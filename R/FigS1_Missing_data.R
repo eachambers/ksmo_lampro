@@ -9,11 +9,11 @@ theme_set(theme_cowplot())
 ## using the PAUP missdata function.
 
 ##    FILES REQUIRED:
-##          ../../2_Data_processing/data_files_input_into_scripts/missing_data_snps_n105.txt
+##          2_Data_processing/data_files_input_into_scripts/missing_data_snps_n105.txt
 
 # (1) Import data -------------------------------------------------------------
 
-miss_all <- read_tsv("../../2_Data_processing/data_files_input_into_scripts/missing_data_snps_n105.txt")
+miss_all <- read_tsv("2_Data_processing/data_files_input_into_scripts/missing_data_snps_n105.txt")
 
 
 
@@ -46,8 +46,8 @@ p_miss <-
 ### Multiply second y-axis so it scales up to 50; there are 3230 loci total so 3230*0.015=~100
 p_miss <-
   p_miss +
-  geom_point(aes(y=loci_in_assembly*0.015), size=1, color="black") +
-  scale_y_continuous(sec.axis = sec_axis(~./0.015), expand = c(0,0), limits=c(0,50), breaks=seq(0,50, by=10))
+  geom_point(aes(y = loci_in_assembly*0.015), size = 1, color = "black") +
+  scale_y_continuous(sec.axis = sec_axis(~./0.015), expand = c(0,0), limits = c(0,50), breaks = seq(0,50, by = 10))
 
 
 

@@ -6,13 +6,12 @@ library(repel)
 theme_set(theme_cowplot())
 
 ##  The following code generates piecharts from the sNMF and conStruct analyses (Figs. 2a and S7).
-##  A large portion of this code was developed with Spencer J Fox (https://spncrfx.wordpress.com/)
 
 ##    FILES REQUIRED:
 ##    Results from snmf analysis (ancestry proportions (from Q matrices), lat, long, sample ID):
-##          ../data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt
+##          4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt
 ##    Results from conStruct analysis:
-##          ../data_files_input_into_scripts/conStruct_k2_results.txt
+##          4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt
 
 ##    STRUCTURE OF CODE:
 ##              (1) Imports data
@@ -25,8 +24,8 @@ theme_set(theme_cowplot())
 
 # (1) Import data --------------------------------------------------------
 
-k2_data_ksmo <- read_tsv("../data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt", col_names = TRUE)
-k2_construct_ksmo <- read_tsv("../data_files_input_into_scripts/conStruct_k2_results.txt", col_names = TRUE)
+k2_data_ksmo <- read_tsv("4_Data_visualization/data_files_input_into_scripts/lampro_ksmo_k2_run5_data.txt", col_names = TRUE)
+k2_construct_ksmo <- read_tsv("4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt", col_names = TRUE)
 
 ## Build background map
 us <- map_data("state")

@@ -2,6 +2,7 @@ library(adegenet)
 library(tidyverse)
 library(cowplot)
 library(vcfR)
+library(fields)
 
 theme_set(theme_cowplot())
 
@@ -19,11 +20,10 @@ theme_set(theme_cowplot())
 ##    (6) Run correlation test between PC1 loading and geographic distance
 
 ##    FILES REQUIRED:
-##          ../../1_Bioinformatics/iPyrad_output_files/n93_no_missing_data/all_lampro_pruned.str
-##          ../../1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.str (3 elapsoides samples removed)
-##          ../../1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.str (only samples from KS and MO CZ included; n=85)
-##          ../data_files_input_into_scripts/lampro_strata_n93.txt
-##          ../data_files_input_into_scripts/ksmo_coords_MD50.txt
+##          1_Bioinformatics/iPyrad_output_files/n93_no_missing_data/all_lampro_pruned.str
+##          1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.str (3 elapsoides samples removed)
+##          1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.str (only samples from KS and MO CZ included; n=85)
+##          3_Analyses/metadata_n93.txt
 ##          ../data_files_input_into_scripts/corr_test_data_F11400.txt
 
 
@@ -31,15 +31,15 @@ theme_set(theme_cowplot())
 
 # This will automatically detect a .str file and convert to genind
 # Answers to output questions:
-# no. genotypes: 93 (obj) or 90 (obj_noelap) or 85 (obj_cz)
+# no. genotypes: 93 (all_lampro) or 90 (ksmo_alterna) or 85 (lampro_ksmo)
 # no. markers: 16383
 # labels: 1
 # pop factor: 0
 # marker names: 0
 # single row: n (there are two rows per individual)
-obj <- import2genind("../../1_Bioinformatics/iPyrad_output_files/all_lampro_pruned.str")
-obj_noelap <- import2genind("../../1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.str")
-obj_ksmo <- import2genind("../../1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.str")
+obj <- import2genind("1_Bioinformatics/iPyrad_output_files/n93_no_missing_data/all_lampro_pruned.str")
+obj_noelap <- import2genind("1_Bioinformatics/iPyrad_output_files/n90_ksmo_alterna/ksmo_alterna_noMD.str")
+obj_ksmo <- import2genind("1_Bioinformatics/iPyrad_output_files/n85_ksmo_transect/lampro_ksmo.str")
 
 
 
@@ -50,15 +50,16 @@ obj_ksmo <- import2genind("../../1_Bioinformatics/iPyrad_output_files/n85_ksmo_t
 # The three samples were: F10981_KS, F10987_KS, and F14200_KS
 # The population assignment in this strata file is simply based on locality, where
 # KS+OK=gentilis, TX=annulata, FL=elapsoides, and alterna
-strata <- read_tsv("../data_files_input_into_scripts/lampro_strata_n93.txt", col_names = TRUE) # 93 obs.
+strata <- read_tsv("3_Analyses/metadata_n93.txt", col_names = TRUE) %>% 
+  dplyr::select(sample_ID, strata)
 
 strata_noelap <-
   strata %>% 
-  filter(locality!="elapsoides")
+  filter(strata!="elapsoides")
 
 strata_ksmo <-
   strata_noelap %>% 
-  filter(locality!="alterna")
+  filter(strata!="alterna")
 
 # Assign strata to strata within the obj genind object
 strata(obj) <- strata
@@ -69,20 +70,24 @@ strata(obj_ksmo) <- strata_ksmo
 # head(strata(obj, ~locality))
 
 # Now, let's take one of these strata columns (population) and assign it as the pop
-setPop(obj) <- ~locality
-setPop(obj_noelap) <- ~locality
-setPop(obj_ksmo) <- ~locality
+setPop(obj) <- ~strata
+setPop(obj_noelap) <- ~strata
+setPop(obj_ksmo) <- ~strata
 
 # Check that it worked
-popNames(obj_ksmo)
-
+# popNames(obj)
+# popNames(obj_noelap)
+# popNames(obj_ksmo)
 
 
 # (3a) Run PCA on full dataset -------------------
 
 sum(is.na(obj$tab)) # 181924
 X_full <- scaleGen(obj, NA.method="mean")
-X_full[1:20, 1:20]
+
+# Verify that it worked:
+# X_full[1:20, 1:20]
+
 pca1_full <- dudi.pca(X_full, cent=FALSE, scale=FALSE, scannf=FALSE, nf=3)
 
 
@@ -91,7 +96,6 @@ pca1_full <- dudi.pca(X_full, cent=FALSE, scale=FALSE, scannf=FALSE, nf=3)
 
 sum(is.na(obj_noelap$tab)) # 159231
 X_noelap <- scaleGen(obj_noelap, NA.method="mean")
-X_noelap[1:20, 1:20]
 pca1_noelap <- dudi.pca(X_noelap, cent=FALSE, scale=FALSE, scannf=FALSE, nf=3)
 
 
@@ -100,7 +104,6 @@ pca1_noelap <- dudi.pca(X_noelap, cent=FALSE, scale=FALSE, scannf=FALSE, nf=3)
 
 sum(is.na(obj_ksmo$tab)) # 148383
 X_ksmo <- scaleGen(obj_ksmo, NA.method="mean")
-X_ksmo[1:20, 1:20]
 pca1_ksmo <- dudi.pca(X_ksmo, cent=FALSE, scale=FALSE, scannf=FALSE, nf=3)
 
 
@@ -142,14 +145,14 @@ draw_PCA_plot_PC3 <- function(sample_names, strata_dat, other_axis, palette_vals
     ylab("PC 2")
 }
     
-p_full_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_full$li, strata_dat=strata$locality, palette_vals=palette)
-p_full_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_full$li, strata_dat=strata$locality, palette_vals=palette)
+p_full_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_full$li, strata_dat=strata$strata, palette_vals=palette)
+p_full_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_full$li, strata_dat=strata$strata, palette_vals=palette)
 
-p_noelap_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_noelap$li, strata_dat=strata_noelap$locality, palette_vals=palette_noelap)
-p_noelap_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_noelap$li, strata_dat=strata_noelap$locality, palette_vals=palette_noelap)
+p_noelap_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_noelap$li, strata_dat=strata_noelap$strata, palette_vals=palette_noelap)
+p_noelap_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_noelap$li, strata_dat=strata_noelap$strata, palette_vals=palette_noelap)
 
-p_ksmo_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_ksmo$li, strata_dat=strata_ksmo$locality, palette_vals=palette_ksmo)
-p_ksmo_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_ksmo$li, strata_dat=strata_ksmo$locality, palette_vals=palette_ksmo)
+p_ksmo_PC12 <- draw_PCA_plot_PC2(sample_names=pca1_ksmo$li, strata_dat=strata_ksmo$strata, palette_vals=palette_ksmo)
+p_ksmo_PC13 <- draw_PCA_plot_PC3(sample_names=pca1_ksmo$li, strata_dat=strata_ksmo$strata, palette_vals=palette_ksmo)
 
 plot_grid(p_ksmo_PC12, p_ksmo_PC13)
 ggsave("FigS4EF_KSMO_PCA.pdf", width=11, height=6)
@@ -165,33 +168,31 @@ ggsave("FigS4AB_all_PCA.pdf", width=11, height=6)
 # (5) Calculate distances ----------------------------------------------------
 
 # The following code is also contained within the conStruct analysis script
-# Make sure input file is a) long then lat and b) in the same order as the ustr file!
-ksmo_coords <- read_tsv("../data_files_input_into_scripts/ksmo_coords_MD50.txt", col_names=TRUE) # 85 obs.
-ksmo_coords <- as.matrix(ksmo_coords)
-ksmo_geoDist <- rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
+# Make sure input file is a) long then lat and b) in the same order as the ustr file (ordered_no_vcf)!
+ksmo_coords <- read_tsv("3_Analyses/metadata_n93.txt", col_names = TRUE) %>% 
+  dplyr::filter(strata != "elapsoides",
+                strata != "alterna") %>% 
+  dplyr::select(long, lat) %>% 
+  as.matrix()
+
+# Calculate geo distances
+ksmo_geoDist <- fields::rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
 
 # We just need the column for the farthest west sample (F11400_KS) for the PCA correlation test
 # This sample is no. 22 if samples are ordered by vcf
-final <- as.data.frame(ksmo_geoDist[,22])
-write_tsv(final, "dist_matrix.txt", col_names = FALSE)
+geodists <- as.data.frame(ksmo_geoDist[,22])
+write_tsv(geodists, "dist_matrix.txt", col_names = FALSE)
 
 # Now, combine distance data with PCA results
 corr_data <-
   pca1_ksmo$li %>% 
-  rownames_to_column() %>% 
-  cbind(final) %>% 
-  rename(distance = X1) %>% 
-  select(-Axis2, -Axis3)
+  rownames_to_column(var = "sample_ID") %>% 
+  cbind(geodists) %>% 
+  rename(distance = `ksmo_geoDist[, 22]`) %>% 
+  dplyr::select(-Axis2, -Axis3)
 
-# Can export if you want
-# write_tsv(corr_data, "../data_files_input_into_scripts/corr_test_data_F11400.txt", col_names = TRUE)
-
-    
 
 # (6) Run correlation test ------------------------------------------------
-
-# Import relevant data if not already in environment
-# corr_data <- read_tsv("../data_files_input_into_scripts/corr_test_data_F11400.txt", col_names = TRUE)
 
 res <- cor.test(corr_data$Axis1, corr_data$distance,
                 method = "pearson")
