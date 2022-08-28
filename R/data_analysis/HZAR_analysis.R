@@ -13,7 +13,7 @@ theme_set(theme_cowplot())
 ## (Supp. Dataset 1) from Derryberry et al. (2014) MER 14:652-663.
 
 ##    FILES REQUIRED:
-##          input_hzar_avg object from the Generate_HZAR_input_file.R script [TO RUN HZAR]
+##          input_hzar_avg object from the Generate_HZAR_input_file.R script
 
 ##    STRUCTURE OF CODE:
 ##              (1) Make empty lists and input observed data
@@ -95,19 +95,8 @@ if(require(doMC)){
 
 chainLength = 1e5
 
-# Each model will run off separate seeds:
-# sample(1:1000, 6, replace=FALSE)
-mainSeed = list(A=c(596,528,124,978,544,99),
-                B=c(528,124,978,544,99,596),
-                C=c(124,978,544,99,596,528),
-                D=c(177,712,660,642,395,488),
-                E=c(2,769,147,177,841,295),
-                F=c(165, 272, 622, 738, 213, 656))
-
-
 freq$avg$fitRs$init$modelI$mcmcParam$chainLength <- chainLength #1e5
 freq$avg$fitRs$init$modelI$mcmcParam$burnin <- chainLength %/% 10 #1e4
-freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$F # CHANGE THIS EACH TIME
 
 # Check that the above worked
 print(freq$avg$fitRs$init)
@@ -136,173 +125,146 @@ freq$avg$fitRs$chains <- hzar.multiFitRequest(freq$avg$fitRs$chains,
 
 # (5) Randomize initial value for each fit ---------------------------------------
 
-####################### SET CENTER VALUES ########################
-## runif(15,-30,660) center for models 1-6
-# model 1:
+# Each model will run off separate seeds:
+# sample(1:1000, 6, replace=FALSE)
+mainSeed = list(A=c(596,528,124,978,544,99),
+                B=c(528,124,978,544,99,596),
+                C=c(124,978,544,99,596,528),
+                D=c(177,712,660,642,395,488),
+                E=c(2,769,147,177,841,295),
+                F=c(165, 272, 622, 738, 213, 656))
+
+## To generate random numbers:
+# runif(15,-30,660) center for models 1-6
+# runif(15,0,690) width for models 1-6
+# runif(15,0,1) pMin for models 1-5
+# runif(15,0,1) pMax for models 1-5
+# runif(3,0,690) deltaL: models 2, 5
+# runif(3,0,1) tauL for models 2, 5
+# runif(3,0,690) deltaR for models 3, 5
+# runif(3,0,1) tauR for models 3, 5
+# runif(3,0,1) tauM for model 4
+# runif(3,0,690) deltaM for model 4
+
+####################### MODEL 1 () #######################
+############### [c, w, pMin, pMax] ########################
+# freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$A
 # freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 432.006881
 # freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 100.356347
 # freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 587.144966
-
-# model 2:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 458.839561
-# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 588.279165
-# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 28.742727
-
-# model 3:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 158.790457
-# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 649.814984
-# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 203.995312
-
-# model 4:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 189.459069
-# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 320.329683
-# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 249.764026
-
-# model 5:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 452.036011
-# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 178.492941
-# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 6.501785
-
-# model 6: 
-freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 518.74816
-freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 108.20439
-freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 616.63816
-
-##################### SET WIDTH VALUES #######################
-## runif(15,0,690) width for models 1-6
-# model 1: 
 # freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 283.09967
 # freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 436.41024
 # freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 84.82553
-
-# model 2:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 8.662236
-# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 516.097896
-# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 171.830732
-
-# model 3:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 93.505144
-# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 497.208883
-# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 485.961920
-
-# model 4:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 434.640996
-# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 428.257560
-# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 639.039660
-
-# model 5:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 182.189841
-# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 218.605990
-# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 20.161982
-
-# model 6:
-freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 256.992895
-freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 303.897667
-freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 320.772177
-
-####################### SET pMIN VALUES ########################
-## runif(15,0,1) pMin
 # freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.63840100
 # freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.56778522
 # freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.15172399
-
-# model 2: free // left
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.91416327
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.66370784
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.39050743
-
-# model 3: free // right
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.40052113
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.25350542
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.37046092
-
-# model 4: free // mirror
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.92339812
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.02262226
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.32464770
-
-# model 5: free // both
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.23246689
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.69235535
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.24519266
-
-####################### SET pMAX VALUES ########################
-## runif(15,0,1) pMax for models 1-5
 # freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.8207061
 # freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.7225998
 # freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.9503700
 
-# model 2:
+####################### MODEL 2 [free // left] ########################
+################# [c, w, pMin, pMax, deltaL, tauL] ####################### 
+# freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$B
+# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 458.839561
+# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 588.279165
+# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 28.742727
+# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 8.662236
+# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 516.097896
+# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 171.830732
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.91416327
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.66370784
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.39050743
 # freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.3551041
 # freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.9698223
 # freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.7361401
-
-# model 3:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.5489139
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.1495655
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.8675297
-
-# model 4:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.8374373
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.8774964
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.2848403
-
-# model 5:
-# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.5586895
-# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.4446208
-# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.4682641
-
-####################### SET deltaL VALUES ########################
-## runif(3,0,690) deltaL: models 2, 5
 # freq$avg$fitRs$chains[[1]]$modelParam$init["deltaL"]= 290.2459
 # freq$avg$fitRs$chains[[2]]$modelParam$init["deltaL"]= 242.7785
 # freq$avg$fitRs$chains[[3]]$modelParam$init["deltaL"]= 351.2703
-
-# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaL"]= 152.6738
-# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaL"]= 343.9682
-# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaL"]= 671.5616
-
-####################### SET tauL VALUES ########################
-## runif(3,0,1) tauL for models 2, 5
 # freq$avg$fitRs$chains[[1]]$modelParam$init["tauL"]= 0.3205238
 # freq$avg$fitRs$chains[[2]]$modelParam$init["tauL"]= 0.9736836
 # freq$avg$fitRs$chains[[3]]$modelParam$init["tauL"]= 0.6674259
 
-# freq$avg$fitRs$chains[[1]]$modelParam$init["tauL"]= 0.1867361
-# freq$avg$fitRs$chains[[2]]$modelParam$init["tauL"]= 0.2796495
-# freq$avg$fitRs$chains[[3]]$modelParam$init["tauL"]= 0.3601411
-
-####################### SET deltaR VALUES ########################
-## runif(3,0,690) deltaR for models 3, 5
+####################### MODEL 3 (free // right) ########################
+################### [c, w, pMin, pMax, deltaR, tauR] ####################### 
+# freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$C
+# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 158.790457
+# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 649.814984
+# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 203.995312
+# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 93.505144
+# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 497.208883
+# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 485.961920
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.40052113
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.25350542
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.37046092
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.5489139
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.1495655
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.8675297
 # freq$avg$fitRs$chains[[1]]$modelParam$init["deltaR"]=472.6632
 # freq$avg$fitRs$chains[[2]]$modelParam$init["deltaR"]=390.6439
 # freq$avg$fitRs$chains[[3]]$modelParam$init["deltaR"]=545.4608
-
-# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaR"]=55.74919
-# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaR"]=315.64708
-# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaR"]=330.91392
-
-####################### SET tauR VALUES ########################
-## runif(3,0,1) tauR for models 3, 5
 # freq$avg$fitRs$chains[[1]]$modelParam$init["tauR"]=0.9146836
 # freq$avg$fitRs$chains[[2]]$modelParam$init["tauR"]=0.2064311
 # freq$avg$fitRs$chains[[3]]$modelParam$init["tauR"]= 0.2435238
 
+####################### MODEL 4 (free // mirror) ########################
+################## [c, w, pMin, pMax, tauM, deltaM] ####################### 
+# freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$D
+# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 189.459069
+# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 320.329683
+# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 249.764026
+# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 434.640996
+# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 428.257560
+# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 639.039660
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.92339812
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.02262226
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.32464770
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.8374373
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.8774964
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.2848403
+# freq$avg$fitRs$chains[[1]]$modelParam$init["tauM"]=0.6743654
+# freq$avg$fitRs$chains[[2]]$modelParam$init["tauM"]=0.2145613
+# freq$avg$fitRs$chains[[3]]$modelParam$init["tauM"]= 0.3934755
+# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaM"]=279.9647
+# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaM"]=481.7391
+# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaM"]=269.2668
+
+####################### MODEL 5 (free // both) ########################
+################## [c, w, pMin, pMax, deltaL+R, tauL+R] ####################### 
+# freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$E
+# freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 452.036011
+# freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 178.492941
+# freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 6.501785
+# freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 182.189841
+# freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 218.605990
+# freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 20.161982
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMin"]= 0.23246689
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMin"]= 0.69235535
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMin"]= 0.24519266
+# freq$avg$fitRs$chains[[1]]$modelParam$init["pMax"]= 0.5586895
+# freq$avg$fitRs$chains[[2]]$modelParam$init["pMax"]= 0.4446208
+# freq$avg$fitRs$chains[[3]]$modelParam$init["pMax"]= 0.4682641
+# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaL"]= 152.6738
+# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaL"]= 343.9682
+# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaL"]= 671.5616
+# freq$avg$fitRs$chains[[1]]$modelParam$init["tauL"]= 0.1867361
+# freq$avg$fitRs$chains[[2]]$modelParam$init["tauL"]= 0.2796495
+# freq$avg$fitRs$chains[[3]]$modelParam$init["tauL"]= 0.3601411
+# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaR"]=55.74919
+# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaR"]=315.64708
+# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaR"]=330.91392
 # freq$avg$fitRs$chains[[1]]$modelParam$init["tauR"]=0.6868013
 # freq$avg$fitRs$chains[[2]]$modelParam$init["tauR"]=0.2202784
 # freq$avg$fitRs$chains[[3]]$modelParam$init["tauR"]= 0.8867558
 
-####################### SET tauM VALUES ########################
-## runif(3,0,1) tauM for model 4
-# freq$avg$fitRs$chains[[1]]$modelParam$init["tauM"]=0.6743654
-# freq$avg$fitRs$chains[[2]]$modelParam$init["tauM"]=0.2145613
-# freq$avg$fitRs$chains[[3]]$modelParam$init["tauM"]= 0.3934755
-
-####################### SET deltaM VALUES ######################
-# ## runif(3,0,690) deltaM for model 4
-# freq$avg$fitRs$chains[[1]]$modelParam$init["deltaM"]=279.9647
-# freq$avg$fitRs$chains[[2]]$modelParam$init["deltaM"]=481.7391
-# freq$avg$fitRs$chains[[3]]$modelParam$init["deltaM"]=269.2668
+####################### MODEL 6 ########################
+####################### [c, w] ####################### 
+freq$avg$fitRs$init$modelI$mcmcParam$seed[[1]] <- mainSeed$F
+freq$avg$fitRs$chains[[1]]$modelParam$init["center"]= 518.74816
+freq$avg$fitRs$chains[[2]]$modelParam$init["center"]= 108.20439
+freq$avg$fitRs$chains[[3]]$modelParam$init["center"]= 616.63816
+freq$avg$fitRs$chains[[1]]$modelParam$init["width"]= 256.992895
+freq$avg$fitRs$chains[[2]]$modelParam$init["width"]= 303.897667
+freq$avg$fitRs$chains[[3]]$modelParam$init["width"]= 320.772177
 
 
 

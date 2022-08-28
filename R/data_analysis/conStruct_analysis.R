@@ -47,13 +47,12 @@ write_delim(MD50_ksmo, "3_Analyses/2_Population_genetic_structure/conStruct_inpu
 # (2) Convert ustr to conStruct file ------------------------------------------
 
 # Saves an RData file in working directory
-conStruct.data <- structure2conStruct(infile="3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50.ustr",
+conStruct.data <- conStruct::structure2conStruct(infile="3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50.ustr",
                                       start.loci=2, # first col that contains data
                                       start.samples=1, # first row that contains samples
                                       onerowperind=FALSE, # two rows per individual
                                       missing.datum=-9, # missing data
                                       outfile="3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50")
-
 
 
 # (3) Calculate geographic distances ------------------------------------------
@@ -67,24 +66,39 @@ ksmo_coords <- as.matrix(ksmo_coords)
 ksmo_geoDist <- fields::rdist.earth(x1=ksmo_coords, miles=FALSE, R=NULL)
 
 
-
 # (4) Run conStruct -----------------------------------------------------------
 
 # Load frequency data if haven't run above code:
-load("3_Analyses/2_Population_genetic_structure/conStruct_input_files/missing_data_50.RData")
+load("3_Analyses/2_Population_genetic_structure/conStruct_input_files/n85_ksmo_MD50.RData")
 
 k2_ksmo <- conStruct(spatial = TRUE,
-                        K = 2,
-                        freqs = freqs, # be sure to load the data
-                        geoDist = md50_geoDist,
-                        coords = md50_coords,
-                        prefix = "md50",
-                        control = setNames(list(0.9),"adapt_delta"),
-                        n.chains = 2,
-                        n.iter = 12000,
-                        make.figs = TRUE,
-                        save.files = TRUE)
+                     K = 2,
+                     freqs = freqs, # be sure to load the data
+                     geoDist = ksmo_geoDist,
+                     coords = ksmo_coords,
+                     prefix = "md50",
+                     control = setNames(list(0.9),"adapt_delta"),
+                     n.chains = 2,
+                     n.iter = 12000,
+                     make.figs = TRUE,
+                     save.files = TRUE)
 
+# Save results
+# save(k2_ksmo, file = "3_Analyses/2_Population_genetic_structure/conStruct_input_files/md50_conStruct.results.Robj")
+# load("3_Analyses/2_Population_genetic_structure/conStruct_input_files/md50_conStruct.results.Robj")
+
+### Export results for plotting purposes
+ksmo_coords <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE) %>% 
+  dplyr::select(-SW_onedeglong)
+
+results <- conStruct.results$chain_1$MAP$admix.proportions %>% 
+  as.data.frame() %>% 
+  rename(k1 = V1,
+         k2 = V2)
+  
+dat <- cbind(ksmo_coords, results)
+
+write.csv(dat, "4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt")
 
 
 # (5) Cross-validation analysis -------------------------------------------
@@ -124,13 +138,13 @@ sp.CIs <- apply(sp.results,1,function(x){mean(x) + c(-1.96,1.96) * sd(x)/length(
 nsp.CIs <- apply(nsp.results,1,function(x){mean(x) + c(-1.96,1.96) * sd(x)/length(x)})
 
 # Then, plot cross-validation results with 8 replicates
-par(mfrow=c(1,3))
+par(mfrow = c(1,3))
 
 plot(rowMeans(sp.results),
      pch=19,col="dodgerblue3",
-     ylab="",xlab="",
+     ylab = "",xlab = "",
      ylim=range(sp.results,nsp.results),
-     main="")
+     main = "")
 
-points(rowMeans(nsp.results),col="darkorange2",pch=19)
+points(rowMeans(nsp.results),col="darkorange2",pch = 19)
 
