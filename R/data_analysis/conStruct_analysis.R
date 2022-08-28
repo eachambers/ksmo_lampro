@@ -98,7 +98,7 @@ results <- conStruct.results$chain_1$MAP$admix.proportions %>%
   
 dat <- cbind(ksmo_coords, results)
 
-write.csv(dat, "4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt")
+write_tsv(dat, "4_Data_visualization/data_files_input_into_scripts/conStruct_k2_results.txt")
 
 
 # (5) Cross-validation analysis -------------------------------------------

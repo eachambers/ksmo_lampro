@@ -99,7 +99,7 @@ p_k3_ksmoalt_long <- structure_plot(k3_data_ksmoalt, k3_cols, k3_data_ksmoalt$or
 p_k2_ksmo_long <- structure_plot(k2_data_ksmo, k2_cols, k2_data_ksmo$ordered_no_long)
 
 ### conStruct visualization: ks-mo
-p_k2_construct_ksmo <- structure_plot(k2_construct_ksmo, k2_cols, k2_construct_ksmo$ordered_no_long)
+p_k2_construct_ksmo <- structure_plot(k2_construct_ksmo, k2_cols_construct, k2_construct_ksmo$ordered_no_long)
 
 
 # (4) Export plots --------------------------------------------------------

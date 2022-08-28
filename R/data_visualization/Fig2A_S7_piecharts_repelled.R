@@ -103,7 +103,8 @@ us %>%
 
 # Finally, plot the pies you've drawn on the map you've drawn
 list(kans_map, pies_to_add$drawn_pies) %>% 
-  reduce(.f = `+`) 
+  reduce(.f = `+`)
+
 ggsave("sNMF_piechart_repelled.pdf", width=11, height=8.5)
 
 # list(kans_map, pies_to_add$drawn_pies) %>% 
