@@ -93,8 +93,8 @@ ksmo_coords <- read_tsv("3_Analyses/metadata_ksmo.txt", col_names = TRUE) %>%
 
 results <- conStruct.results$chain_1$MAP$admix.proportions %>% 
   as.data.frame() %>% 
-  rename(k1 = V1,
-         k2 = V2)
+  rename(k2 = V1,
+         k1 = V2) # so pies are colored correctly
   
 dat <- cbind(ksmo_coords, results)
 
