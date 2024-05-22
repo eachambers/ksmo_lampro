@@ -6,7 +6,7 @@ This repository contains code for analyses and data visualization from:
 
 This paper focused on resolving species boundaries in the *Lampropeltis triangulum* complex in the United States. All raw data and input files can be found on Dryad [here](https://doi.org/10.5061/dryad.9s4mw6mj8), and raw, demultiplexed fastqs can be found on SRA (BioProject PRJNA884341).
 
-*Please note: latitude values are not provided in input files on Dryad because of concerns related to the commercial exploitation of these animals; I can provide latitude values to qualified investigators upon request for the purposes of re-analysis and reproducibility.*
+*Please note: latitude values are not provided in input files on Dryad because of concerns related to the commercial exploitation of these animals; I can provide latitude values to qualified investigators upon request for the purposes of re-analysis and reproducibility.* ***I have provided example coordinates with jittered latitude values [here](https://github.com/eachambers/ksmo_lampro/blob/main/metadata_n93_jitteredcoords.txt) that can be used for the sake of reproducibility.***
 
 **Subset coding:**
 
